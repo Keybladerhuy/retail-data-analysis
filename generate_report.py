@@ -351,16 +351,16 @@ def page_detail(pdf):
              color=TEXT_COL, fontsize=9.5, va='top', linespacing=1.6,
              fontproperties=fp(9.5))
 
-    section_label(fig, 0.562, '季節性分解（トレンド・季節成分・ノイズ）')
-    chart_decomp = load_chart('seasonal_decomposition.png')
-    if chart_decomp is not None:
-        ax2 = fig.add_axes([0.04, 0.055, 0.92, 0.490])
-        ax2.imshow(chart_decomp); ax2.axis('off')
-    fig.text(0.06, 0.544,
+    section_label(fig, 0.548, '季節性分解（トレンド・季節成分・ノイズ）')
+    fig.text(0.06, 0.514,
              '売上時系列を「長期トレンド」「季節性」「残差」に分解。'
              '季節性を除いても右肩上がりのトレンドが確認でき、事業の基礎成長が示されています。',
              color=TEXT_COL, fontsize=9.5, va='top', linespacing=1.6,
              fontproperties=fp(9.5))
+    chart_decomp = load_chart('seasonal_decomposition.png')
+    if chart_decomp is not None:
+        ax2 = fig.add_axes([0.04, 0.052, 0.92, 0.448])
+        ax2.imshow(chart_decomp); ax2.axis('off')
 
     pdf.savefig(fig, bbox_inches='tight')
     plt.close(fig)
