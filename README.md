@@ -29,6 +29,8 @@
 
 グラフには日本語の解説と「次にとるべきアクション」をセットでお届けします。
 
+**[サンプルレポートをダウンロード（PDF）→ output/report_sample.pdf](output/report_sample.pdf)**
+
 ---
 
 ## このポートフォリオについて

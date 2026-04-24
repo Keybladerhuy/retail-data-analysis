@@ -20,5 +20,5 @@ Thumbs.db
 # Claude Code
 .claude/
 
-# Output (report PDF is committed manually after generation)
-output/report_sample.pdf
+# Generated outputs — charts and report are committed
+# (regenerate anytime with: python generate_report.py)
