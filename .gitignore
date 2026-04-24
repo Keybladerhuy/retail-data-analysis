@@ -1,0 +1,24 @@
+# Data files (download separately - see README)
+data/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+venv/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code
+.claude/
+
+# Output (report PDF is committed manually after generation)
+output/report_sample.pdf
