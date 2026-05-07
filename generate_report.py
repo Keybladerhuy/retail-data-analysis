@@ -2,9 +2,21 @@
 generate_report.py
 Generates output/report_sample.pdf — a professional consulting-style report.
 Run from the project root: python generate_report.py
+
+Optional env vars (can be set in .env):
+  SENDGRID_API_KEY        — enables PDF delivery by email
+  REPORT_RECIPIENT_EMAIL  — who receives the report
+  REPORT_SENDER_EMAIL     — verified sender address in SendGrid
+  GOOGLE_SHEETS_KEY_PATH  — service account JSON for live data
+  GOOGLE_SHEETS_TEMPLATE_ID — spreadsheet ID to load from
 """
-import os, warnings
+import os, warnings, logging
 warnings.filterwarnings('ignore')
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+log = logging.getLogger(__name__)
+
+from dotenv import load_dotenv
+load_dotenv()
 
 import matplotlib
 matplotlib.use('Agg')
@@ -435,11 +447,160 @@ def page_appendix(pdf):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# DATA LOADING & METRIC EXTRACTION
+# ─────────────────────────────────────────────────────────────────────────────
+
+def load_report_data():
+    """Load sales data via sheets_loader; returns None if no local data exists."""
+    try:
+        from sheets_loader import load_data
+        df = load_data(
+            spreadsheet_id=os.environ.get('GOOGLE_SHEETS_TEMPLATE_ID'),
+            sheet_name='Sheet1',
+        )
+        log.info('Data loaded: %d rows', len(df))
+        return df
+    except FileNotFoundError as exc:
+        log.warning('No data available for metric extraction: %s', exc)
+        return None
+    except Exception as exc:
+        log.warning('Data load error: %s', exc)
+        return None
+
+
+def extract_metrics(df):
+    """
+    Return a dict with the 3 headline metrics used in the email summary.
+    Falls back to descriptive placeholders if df is None.
+    """
+    if df is None or df.empty:
+        return {
+            'total_revenue':     None,
+            'top_product':       'N/A (run notebooks to generate data)',
+            'top_segment':       'N/A',
+            'top_segment_pct':   None,
+        }
+
+    total_revenue = df['Revenue'].sum()
+
+    product_revenue = (
+        df.groupby('Description')['Revenue'].sum().sort_values(ascending=False)
+    )
+    top_product = product_revenue.index[0] if len(product_revenue) else 'N/A'
+
+    # Approximate segment by recency: customers active in the last 90 days = Champions proxy
+    if 'Customer ID' in df.columns:
+        last_date   = df['InvoiceDate'].max()
+        cutoff      = last_date - __import__('pandas').Timedelta(days=90)
+        recent_rev  = df[df['InvoiceDate'] >= cutoff]['Revenue'].sum()
+        top_seg_pct = (recent_rev / total_revenue * 100) if total_revenue else 0
+        top_segment = 'Champions / Loyal Customers'
+    else:
+        top_seg_pct = None
+        top_segment = 'N/A'
+
+    return {
+        'total_revenue':   total_revenue,
+        'top_product':     top_product,
+        'top_segment':     top_segment,
+        'top_segment_pct': top_seg_pct,
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EMAIL DELIVERY
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _build_email_body(metrics, report_date):
+    rev = metrics['total_revenue']
+    rev_str    = f'£{rev:,.0f}' if rev is not None else 'N/A'
+    pct_str_en = f'{metrics["top_segment_pct"]:.0f}% of revenue' if metrics['top_segment_pct'] else ''
+    pct_str_jp = f'売上の{metrics["top_segment_pct"]:.0f}%' if metrics['top_segment_pct'] else ''
+
+    return (
+        f'Weekly Retail Analysis Report — {report_date}\n'
+        f'\n'
+        f'Key Metrics:\n'
+        f'  • Total Revenue:         {rev_str}\n'
+        f'  • Top Product:           {metrics["top_product"]}\n'
+        f'  • Top Customer Segment:  {metrics["top_segment"]}'
+        + (f' ({pct_str_en})' if pct_str_en else '') +
+        f'\n\nThe full report is attached as a PDF.\n'
+        f'\n'
+        f'---\n'
+        f'\n'
+        f'週次小売分析レポート — {report_date}\n'
+        f'\n'
+        f'主要指標：\n'
+        f'  ・総売上：　　　　　{rev_str}\n'
+        f'  ・売上トップ商品：　{metrics["top_product"]}\n'
+        f'  ・主要顧客セグメント：{metrics["top_segment"]}'
+        + (f'（{pct_str_jp}）' if pct_str_jp else '') +
+        f'\n\nPDF形式のレポートを添付しております。\n'
+    )
+
+
+def send_report_email(pdf_path, metrics):
+    """Send the PDF report by email via SendGrid. No-ops if API key is absent."""
+    import base64
+
+    api_key   = os.environ.get('SENDGRID_API_KEY', '')
+    to_email  = os.environ.get('REPORT_RECIPIENT_EMAIL', '')
+    from_email = os.environ.get('REPORT_SENDER_EMAIL', '')
+
+    if not api_key:
+        log.warning('SENDGRID_API_KEY not set — skipping email delivery.')
+        return
+    if not to_email or not from_email:
+        log.warning('REPORT_RECIPIENT_EMAIL or REPORT_SENDER_EMAIL not set — skipping email.')
+        return
+
+    try:
+        from sendgrid import SendGridAPIClient
+        from sendgrid.helpers.mail import (
+            Mail, Attachment, FileContent, FileName, FileType, Disposition
+        )
+    except ImportError:
+        log.warning('sendgrid package not installed — skipping email delivery.')
+        return
+
+    report_date = date.today().strftime('%Y-%m-%d')
+    subject     = f'Weekly Retail Report — {report_date}'
+    body        = _build_email_body(metrics, report_date)
+
+    with open(pdf_path, 'rb') as f:
+        encoded = base64.b64encode(f.read()).decode()
+
+    message = Mail(
+        from_email=from_email,
+        to_emails=to_email,
+        subject=subject,
+        plain_text_content=body,
+    )
+    message.attachment = Attachment(
+        file_content=FileContent(encoded),
+        file_name=FileName(os.path.basename(pdf_path)),
+        file_type=FileType('application/pdf'),
+        disposition=Disposition('attachment'),
+    )
+
+    try:
+        sg = SendGridAPIClient(api_key)
+        response = sg.send(message)
+        log.info('Email sent → %s (status %s)', to_email, response.status_code)
+    except Exception as exc:
+        log.error('Email delivery failed: %s', exc)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # MAIN
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
     os.makedirs(os.path.join(ROOT, 'output'), exist_ok=True)
     print(f'Generating {OUT} ...')
+
+    df      = load_report_data()
+    metrics = extract_metrics(df)
 
     with PdfPages(OUT) as pdf:
         page_cover(pdf)
@@ -456,3 +617,5 @@ if __name__ == '__main__':
         d['Subject'] = '売上・顧客データ分析レポート（サンプル）'
 
     print(f'\nDone → {OUT}')
+
+    send_report_email(OUT, metrics)
