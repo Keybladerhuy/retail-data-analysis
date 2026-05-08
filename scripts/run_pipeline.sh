@@ -10,7 +10,7 @@ NOTEBOOKS=(
 
 for nb in "${NOTEBOOKS[@]}"; do
   echo "==> Running ${nb}.ipynb"
-  jupyter nbconvert --to notebook --execute "notebooks/${nb}.ipynb" \
+  python3 -m nbconvert --to notebook --execute "notebooks/${nb}.ipynb" \
     --output "/tmp/${nb}_executed.ipynb" \
     --ExecutePreprocessor.timeout=900
 done
