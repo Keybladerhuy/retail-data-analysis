@@ -2,7 +2,7 @@
 
 **Automated weekly analytics reports for retail businesses**
 
-→ [See the full pitch](https://keybladerhuy.github.io/retail-data-analysis/pitch)
+→ [See the full pitch](https://keybladerhuy.github.io/auto-report/pitch)
 
 ---
 
@@ -52,7 +52,7 @@ Open to freelance data analysis and reporting engagements.
 
 **毎週月曜の朝、分析レポートが自動でメールに届く。ダッシュボードも、担当者も不要。**
 
-→ [サービス紹介ページを見る](https://keybladerhuy.github.io/retail-data-analysis/pitch)
+→ [サービス紹介ページを見る](https://keybladerhuy.github.io/auto-report/pitch)
 
 ---
 
