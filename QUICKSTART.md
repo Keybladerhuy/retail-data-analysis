@@ -18,6 +18,7 @@ Optionally, copy `.env.example` to `.env` and fill in credentials to enable emai
 
 # Step 2 — assemble PDF and send email (if SendGrid is configured)
 python generate_report.py
+python3 generate_report.py (macOs)
 ```
 
 The PDF is saved to `output/report_sample.pdf`. This runs automatically every Monday 08:00 JST via GitHub Actions.

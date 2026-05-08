@@ -28,10 +28,10 @@ This portfolio uses two years of retail transaction data to show what a real wee
 You connect your sales data — a Google Sheet you already maintain, or a regular Excel file.
 
 **2. Automatic Analysis**
-Every weekend, the system reads your data, makes sense of it, and builds the charts — revenue trends, top products, customer behaviour. No one needs to touch anything.
+Every week, the system reads your (updated) data, analyzes, and builds the summaries and charts — revenue trends, top products, customer behaviour. No one needs to touch anything.
 
 **3. Insights in Your Inbox**
-Monday morning, a clean PDF lands in your email. Revenue trends, your top 20 products, and a breakdown of your customers by how active they are.
+A personal customized reports gets sent out to your email or teams/Slack.
 
 ---
 
