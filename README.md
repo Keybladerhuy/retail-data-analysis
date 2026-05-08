@@ -1,6 +1,6 @@
-# Data Analysis & Reporting — On Autopilot
+# Data Analysis & Reporting — Automated
 
-**Automated weekly analytics reports for retail businesses. No dashboards, no analysts, just a PDF in your inbox every Monday.**
+**Automated weekly analytics reports for retail businesses**
 
 → [See the full pitch](https://keybladerhuy.github.io/retail-data-analysis/pitch)
 
@@ -42,6 +42,8 @@ Senior data scientist at a global semiconductor manufacturer. Day-to-day work co
 Open to freelance data analysis and reporting engagements.
 
 **Contact:** nguyenandydevjp@gmail.com
+
+→ [Run this yourself](QUICKSTART.md)
 
 ---
 ---
