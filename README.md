@@ -1,4 +1,4 @@
-# Automated Retail Analytics
+# Automated Analytics & Reporting
 
 **Weekly data analysis reports, delivered to your inbox — no dashboards, no manual work.**
 
