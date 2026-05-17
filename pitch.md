@@ -1,9 +1,9 @@
 ---
 layout: default
-title: Weekly Retail Insights — On Autopilot
+title: Weekly Auto-Insights
 ---
 
-# Weekly Retail Insights — On Autopilot
+# Weekly Auto Insights
 
 ## The problem
 
@@ -13,7 +13,7 @@ You have sales data, but no time to look at it. Most business owners glance at l
 
 ## See it in action
 
-This is a real sample report, built from two years of retail transaction data. It's what a client would receive in their inbox on Monday morning.
+This is a real sample report, built from two years of retail transaction data. It's what a client would receive in their inbox. 
 
 | | |
 |---|---|
@@ -25,8 +25,8 @@ This is a real sample report, built from two years of retail transaction data. I
 
 ## How it works
 
-**1. Your Data, Always Up to Date**
-You connect the latest sales data, for example via Google Sheets.
+**1. Your Data:**
+You share your sales data — a Google Sheet works well, or a CSV export if that's easier.
 
 ![Data input](img/1_excel_to_gsheets.svg)
 
@@ -35,8 +35,8 @@ Every week, the system reads your data, analyses it, and builds the summary repo
 
 ![Automation pipeline](img/2_data-automation-pipeline.svg)
 
-**3. Custom Report, automatically delivered**
-A clean PDF is generated and sent to your email, Teams, or Slack — whichever you prefer. Each finding comes with a plain-language comment and a specific action to take.
+**3. Custom Report & Auto-Delivery**
+A clean PDF lands in your inbox — or Teams, or Slack, wherever you want it. Each chart comes with a short note on what it means and what to do about it.
 
 ![Report delivery](img/3_custom_report_delivery.svg)
 
@@ -49,7 +49,7 @@ Each weekly report covers:
 - **Revenue trend** — monthly and week-on-week, with year-on-year comparison
 - **Top products** — which SKUs are driving revenue, and which are slipping
 - **Customer segments** — who your best customers are, and which ones are going quiet
-- **Recommended actions** — one clear next step per finding, written in plain language
+- **What to do next** — a short, specific note for each finding. Not just a chart, but a prompt.
 
 ---
 
@@ -71,6 +71,6 @@ Get in touch for a quote — scope and pricing depend on your data and what you 
 
 ## Interested?
 
-Open to new clients. If you want a report built around your own data, get in touch.
+Taking on new clients. If you want a report built around your own data, reach out.
 
 **Contact:** nguyenandydevjp@gmail.com

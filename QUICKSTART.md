@@ -10,7 +10,7 @@ Make sure `data/online_retail_II.xlsx` is present (it's committed to the repo, s
 
 Optionally, copy `.env.example` to `.env` and fill in credentials to enable email delivery and Google Sheets data loading.
 
-## Run the full pipeline
+## Run the full pipeline (use this also for demo purposes)
 
 ```bash
 # Step 1 — clean data and generate all charts (notebooks 01 → 04). Show charts in output/charts
