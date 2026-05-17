@@ -7,11 +7,12 @@ Other delivery targets (Slack, Teams, S3, etc.) can be added here
 without touching report generation.
 
 Required env vars for email (set in .env or GitHub Secrets):
-  SENDGRID_API_KEY        — enables email delivery
+  GMAIL_SENDER            — Gmail address to send from
+  GMAIL_APP_PASSWORD      — 16-character App Password (not your Gmail password)
   REPORT_RECIPIENT_EMAIL  — destination address
-  REPORT_SENDER_EMAIL     — verified sender in SendGrid
 """
-import os, base64, logging
+import os, base64, logging, smtplib
+from email.message import EmailMessage
 from datetime import date
 
 from dotenv import load_dotenv
@@ -105,50 +106,39 @@ def _build_email_body(metrics, report_date):
 
 
 def send_email(metrics):
-    api_key    = os.environ.get('SENDGRID_API_KEY', '')
-    to_email   = os.environ.get('REPORT_RECIPIENT_EMAIL', '')
-    from_email = os.environ.get('REPORT_SENDER_EMAIL', '')
+    from_email   = os.environ.get('GMAIL_SENDER', '')
+    app_password = os.environ.get('GMAIL_APP_PASSWORD', '')
+    to_email     = os.environ.get('REPORT_RECIPIENT_EMAIL', '')
 
-    if not api_key:
-        log.warning('SENDGRID_API_KEY not set — skipping email delivery.')
+    if not from_email or not app_password:
+        log.warning('GMAIL_SENDER / GMAIL_APP_PASSWORD not set — skipping email delivery.')
         return
-    if not to_email or not from_email:
-        log.warning('REPORT_RECIPIENT_EMAIL or REPORT_SENDER_EMAIL not set — skipping email.')
-        return
-
-    try:
-        from sendgrid import SendGridAPIClient
-        from sendgrid.helpers.mail import (
-            Mail, Attachment, FileContent, FileName, FileType, Disposition
-        )
-    except ImportError:
-        log.warning('sendgrid package not installed — skipping email delivery.')
+    if not to_email:
+        log.warning('REPORT_RECIPIENT_EMAIL not set — skipping email delivery.')
         return
 
     report_date = date.today().strftime('%Y-%m-%d')
-    message = Mail(
-        from_email=from_email,
-        to_emails=to_email,
-        subject=f'Weekly Retail Report — {report_date}',
-        plain_text_content=_build_email_body(metrics, report_date),
-    )
+
+    msg = EmailMessage()
+    msg['Subject'] = f'Weekly Retail Report — {report_date}'
+    msg['From']    = from_email
+    msg['To']      = to_email
+    msg.set_content(_build_email_body(metrics, report_date))
 
     for path in [OUT_EN, OUT_JA]:
         if not os.path.exists(path):
             log.warning('Report not found, skipping attachment: %s', path)
             continue
         with open(path, 'rb') as f:
-            encoded = base64.b64encode(f.read()).decode()
-        message.attachment = Attachment(
-            file_content=FileContent(encoded),
-            file_name=FileName(os.path.basename(path)),
-            file_type=FileType('application/pdf'),
-            disposition=Disposition('attachment'),
-        )
+            msg.add_attachment(f.read(), maintype='application', subtype='pdf',
+                               filename=os.path.basename(path))
 
     try:
-        response = SendGridAPIClient(api_key).send(message)
-        log.info('Email sent → %s (status %s)', to_email, response.status_code)
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(from_email, app_password)
+            server.send_message(msg)
+        log.info('Email sent → %s', to_email)
     except Exception as exc:
         log.error('Email delivery failed: %s', exc)
 

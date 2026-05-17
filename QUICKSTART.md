@@ -13,10 +13,10 @@ Optionally, copy `.env.example` to `.env` and fill in credentials to enable emai
 ## Run the full pipeline
 
 ```bash
-# Step 1 — clean data and generate all charts (notebooks 01 → 04)
+# Step 1 — clean data and generate all charts (notebooks 01 → 04). Show charts in output/charts
 ./scripts/run_pipeline.sh
 
-# Step 2 — assemble the PDF reports (English + Japanese)
+# Step 2 — assemble the PDF reports (English + Japanese). Show pdf in output/*.pdf
 .venv/bin/python generate_report.py
 
 # Step 3 — deliver the reports (email via SendGrid; extend for Slack, Teams, S3, etc.)
