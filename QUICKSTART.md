@@ -17,7 +17,7 @@ Optionally, copy `.env.example` to `.env` and fill in credentials to enable emai
 ./scripts/run_pipeline.sh
 
 # Step 2 — assemble PDF and send email (if SendGrid is configured)
-python3 generate_report.py
+.venv/bin/python generate_report.py
 ```
 
 Two PDFs are saved: `output/report_sample_en.pdf` and `output/report_sample_ja.pdf`. This runs automatically every Monday 08:00 JST via GitHub Actions.
